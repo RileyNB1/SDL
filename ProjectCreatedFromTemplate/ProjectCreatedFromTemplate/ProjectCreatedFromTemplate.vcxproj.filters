@@ -62,20 +62,20 @@
     <ClInclude Include="galaga\Star.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-
     <ClInclude Include="galaga\BackgroundStars.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="galaga\StarLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-
     <ClInclude Include="galaga\StarLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="galaga\BackgroundStars.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-
+    <ClInclude Include="galaga\Scoreboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
