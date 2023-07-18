@@ -3,7 +3,6 @@
 #include <AnimatedTexture.h>
 #include <GameEntity.h>
 #include <InputManager.h> 
-#include <galaga/Scoreboard.h>
 
 using namespace SDLFramework;
 namespace Galaga
@@ -44,11 +43,6 @@ namespace Galaga
         Vector2 mCursorOffset;
         int mSelectedMode;
 
-        Scoreboard* mPlayerOneScore;
-        Scoreboard* mPlayerTwoScore;
-        Scoreboard* mTopScore;
-
-
     public:
         StartScreen();
         ~StartScreen();
@@ -59,25 +53,8 @@ namespace Galaga
         void Render() override;
     };
 
-    // top bar entities
-    
-
     StartScreen::StartScreen()
     {
-        mPlayerOneScore = new Scoreboard();
-        mPlayerTwoScore = new Scoreboard();
-        mTopScore = new Scoreboard();
-
-        mPlayerOneScore->Parent(mTopBar);
-        mPlayerTwoScore->Parent(mTopBar);
-        mTopScore->Parent(mTopBar);
-
-        mPlayerOneScore->Position(-Graphics::SCREEN_WIDTH * 0.23f, 40.0f);
-        mPlayerTwoScore->Position(Graphics::SCREEN_WIDTH * 0.32f, 40.0f);
-
-        mTopScore->Position(Graphics::SCREEN_WIDTH * 0.05f, 40.0f);
-        mTopScore->Score(645987);
-
         mTimer = Timer::Instance();
         mInput = InputManager::Instance();
 
@@ -142,7 +119,7 @@ namespace Galaga
         mLogo = new Texture("galaga.png");
         mLogo->Parent(this);
         mLogo->Position(mPlayModes->Position(World) - Vector2(0, 100));
-        mLogo->Scale(Vector2(0.6f, 0.6f));
+        //mLogo->Scale(Vector2(0.4f, 0.4f));
 
         mAnimationStartPos = Vector2(0.0f, Graphics::SCREEN_HEIGHT);
         mAnimationEndPos = Vec2_Zero;
@@ -153,8 +130,6 @@ namespace Galaga
         mCursorStartPos = mCursor->Position(Local);
         mCursorOffset = Vector2(0.0f, 70.0f);
         mSelectedMode = 0;
-
-   
     }
 
     StartScreen::~StartScreen()
@@ -204,14 +179,6 @@ namespace Galaga
 
         mTimer = nullptr;
         mInput = nullptr;
-
-        delete mPlayerOneScore;
-        mPlayerOneScore = nullptr;
-        delete mPlayerTwoScore;
-        mPlayerTwoScore = nullptr;
-        delete mTopScore;
-        mTopScore = nullptr;
-
     }
 
     void StartScreen::Update()
