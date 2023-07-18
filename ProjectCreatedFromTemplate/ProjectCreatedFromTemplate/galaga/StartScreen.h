@@ -2,7 +2,8 @@
 
 #include <AnimatedTexture.h>
 #include <GameEntity.h>
-#include <InputManager.h> 
+#include <managers/InputManager.h> 
+#include <galaga/Scoreboard.h>
 
 using namespace SDLFramework;
 namespace Galaga
@@ -43,9 +44,18 @@ namespace Galaga
         Vector2 mCursorOffset;
         int mSelectedMode;
 
+        Scoreboard* mPlayerOneScore;
+        Scoreboard* mPlayerTwoScore;
+        Scoreboard* mTopScore;
+
+        BackgroundStars* mStars;
+
     public:
         StartScreen();
         ~StartScreen();
+
+        void ResetAnimation();
+        int SelectedMode();
 
         void ChangeSelectedMode(int change);
 
@@ -61,9 +71,9 @@ namespace Galaga
         //empty holder
         mTopBar = new GameEntity(Graphics::SCREEN_WIDTH * 0.5f, 80.0f);
 
-        mPlayerOne = new Texture("1UP", "waltdisney.ttf", 32, { 200, 0, 0 });
-        mPlayerTwo = new Texture("2UP", "waltdisney.ttf", 32, { 200, 0, 0 });
-        mHiScore = new Texture("HI SCORE", "waltdisney.ttf", 32, { 200, 0, 0 });
+        mPlayerOne = new Texture("1UP", "emulogic.ttf", 32, { 200, 0, 0 });
+        mPlayerTwo = new Texture("2UP", "emulogic.ttf", 32, { 200, 0, 0 });
+        mHiScore = new Texture("HI SCORE", "emulogic.ttf", 32, { 200, 0, 0 });
 
         mTopBar->Parent(this);
 
@@ -79,8 +89,8 @@ namespace Galaga
 
         mPlayModes = new GameEntity(Graphics::SCREEN_WIDTH * 0.5f,
             Graphics::SCREEN_HEIGHT * 0.55f);
-        mOnePlayerMode = new Texture("1 Player ", "waltdisney.ttf", 32, { 230, 230, 230 });
-        mTwoPlayerMode = new Texture("2 Players", "waltdisney.ttf", 32, { 230, 230, 230 });
+        mOnePlayerMode = new Texture("1 Player ", "emulogic.ttf", 32, { 230, 230, 230 });
+        mTwoPlayerMode = new Texture("2 Players", "emulogic.ttf", 32, { 230, 230, 230 });
         mCursor = new Texture("Cursor.png");
 
         mPlayModes->Parent(this);
@@ -102,8 +112,8 @@ namespace Galaga
             Graphics::SCREEN_HEIGHT * 0.7f);
 
         mNamco = new Texture("namcot", "namco__.ttf", 36, { 200, 0, 0 });
-        mDates = new Texture("1981 1985 NAMCO LTD.", "waltdisney.ttf", 32, { 230, 230, 230 });
-        mRights = new Texture("ALL RIGHTS RESERVED", "waltdisney.ttf", 32, { 230, 230, 230 });
+        mDates = new Texture("1981 1985 NAMCO LTD.", "emulogic.ttf", 32, { 230, 230, 230 });
+        mRights = new Texture("ALL RIGHTS RESERVED", "emulogic.ttf", 32, { 230, 230, 230 });
 
         mBottomBar->Parent(this);
 
@@ -116,10 +126,10 @@ namespace Galaga
         mRights->Position(0.0f, 170.0f);
 
         //*******************************************************************
-        mLogo = new Texture("galaga.png");
+        mLogo = new Texture("GalagaLogo.png");
         mLogo->Parent(this);
         mLogo->Position(mPlayModes->Position(World) - Vector2(0, 100));
-        //mLogo->Scale(Vector2(0.4f, 0.4f));
+        mLogo->Scale(Vector2(0.4f, 0.4f));
 
         mAnimationStartPos = Vector2(0.0f, Graphics::SCREEN_HEIGHT);
         mAnimationEndPos = Vec2_Zero;
@@ -130,6 +140,27 @@ namespace Galaga
         mCursorStartPos = mCursor->Position(Local);
         mCursorOffset = Vector2(0.0f, 70.0f);
         mSelectedMode = 0;
+
+        //**************************************************************
+        // top bar entities ... 
+        mPlayerOneScore = new Scoreboard();
+        mPlayerTwoScore = new Scoreboard();
+        mTopScore = new Scoreboard();
+
+        mPlayerOneScore->Parent(mPlayerOne);
+        mPlayerTwoScore->Parent(mPlayerTwo);
+        mTopScore->Parent(mHiScore);
+
+        mPlayerOneScore->Position(mPlayerOne->Position(World) + Vector2(0, 80));
+        mPlayerTwoScore->Position(mPlayerTwo->Position(World) + Vector2(0, 80));
+        mTopScore->Position(mHiScore->Position(World) + Vector2(0, 80));
+
+        mPlayerOneScore->Score(0);
+        mPlayerTwoScore->Score(0);
+        mTopScore->Score(645987);
+
+        mStars = BackgroundStars::Instance();
+        mStars->Scroll(true);
     }
 
     StartScreen::~StartScreen()
@@ -177,6 +208,15 @@ namespace Galaga
         delete mLogo;
         mLogo = nullptr;
 
+        delete mPlayerOneScore;
+        mPlayerOneScore = nullptr;
+
+        delete mPlayerTwoScore;
+        mPlayerTwoScore = nullptr;
+
+        delete mTopScore;
+        mTopScore = nullptr;
+
         mTimer = nullptr;
         mInput = nullptr;
     }
@@ -185,13 +225,13 @@ namespace Galaga
     {
         if (mAnimationDone)
         {
-            if (mInput->KeyPressed(SDL_SCANCODE_DOWN)) 
-            { 
-                ChangeSelectedMode(1); 
+            if (mInput->KeyPressed(SDL_SCANCODE_DOWN))
+            {
+                ChangeSelectedMode(1);
             }
-            else if (mInput->KeyPressed(SDL_SCANCODE_UP)) 
-            { 
-                ChangeSelectedMode(-1); 
+            else if (mInput->KeyPressed(SDL_SCANCODE_UP))
+            {
+                ChangeSelectedMode(-1);
             }
         }
         else if (mInput->KeyPressed(SDL_SCANCODE_DOWN) || mInput->KeyPressed(SDL_SCANCODE_UP))
@@ -211,15 +251,17 @@ namespace Galaga
             Position(Lerp(mAnimationStartPos, mAnimationEndPos,
                 mAnimationTimer / mAnimationTotalTime));
         }
+
+        mStars->Update();
     }
 
     void StartScreen::Render()
     {
+        mStars->Render();
 
         mPlayerOne->Render();
         mPlayerTwo->Render();
         mHiScore->Render();
-
 
         mOnePlayerMode->Render();
         mTwoPlayerMode->Render();
@@ -230,6 +272,10 @@ namespace Galaga
         mRights->Render();
 
         mLogo->Render();
+
+        mPlayerOneScore->Render();
+        mPlayerTwoScore->Render();
+        mTopScore->Render();
     }
 
     void StartScreen::ChangeSelectedMode(int change)
@@ -245,4 +291,20 @@ namespace Galaga
         }
         mCursor->Position(mCursorStartPos + mCursorOffset * (float)mSelectedMode);
     }
+
+    void StartScreen::ResetAnimation()
+    {
+        mAnimationStartPos = Vector2(0.0f, Graphics::SCREEN_HEIGHT);
+        mAnimationEndPos = Vec2_Zero;
+        mAnimationTotalTime = 5.0f;
+
+        mAnimationTimer = 0.0f; mAnimationDone = false;
+        Position(mAnimationStartPos);
+        mCursorStartPos = mCursor->Position(Local);
+
+        mCursorOffset = Vector2(0.0f, 70.0f);
+        mSelectedMode = 0;
+    }
+
+    int StartScreen::SelectedMode() { return mSelectedMode; }
 }
